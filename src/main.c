@@ -1,8 +1,9 @@
-#define VERSION 1
+#define VERSION 2
 
 #include "fake6502.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 
 uint8_t memory[0xFFFF] = {0};
@@ -62,14 +63,13 @@ int load(const char* fn, int load_addr_ign) {
   return load_addr;
 }
 
-/*
 void usage() {
   fprintf(stdout, "usage: 6502golf [options] program-binary\n"
                   "options:\n"
-                  "  -x: ignore load address header of binary\n"
-                  "      and load at $0000\n");
+                  "  -h --help:            show this help message\n"
+                  "  -x --no-load-address: ignore load address header of binary\n"
+                  "                        and load at $0000\n");
 }
-*/
 
 int execute(fake6502_context *c) {
   uint16_t lastpc;
@@ -88,11 +88,17 @@ void init(fake6502_context *c) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("6502GOLF version %d\n", VERSION);
+  printf("6502GOLF version %d (-h or --help for options)\n", VERSION);
   printf("6502GOLF comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; See LICENSE!\n\n");
   int load_addr_ignore = 0;
   if (argc > 1) {
-    int load_addr = load(argv[1], load_addr_ignore);
+    // ach, if-else ladders
+    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+      usage();
+    } else if (strcmp(argv[1], "-x") == 0 || strcmp(argv[1], "--no-load-address") == 0) {
+      load_addr_ignore = 1;
+    }
+    int load_addr = load(((load_addr_ignore == 1) ? argv[2] : argv[1]), load_addr_ignore);
     if (load_addr == -1) {
       fprintf(stderr, "File does not exist!\n");
       return 1;
