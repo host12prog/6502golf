@@ -1,0 +1,56 @@
+6502golf
+=========================
+6502 code golf machine (inspired by mokehehe's z80golf)
+Useful for getting to grips with 6502 first, before
+coding in 6502 for another system (like Commodore
+64, VIC-20, NES, ...)
+
+BUILDING
+========================
+Very unfortunately, I cannot provide binaries for
+you right now, but building 6502golf is easy and
+requires no other dependencies. All you need are:
+- a C compiler (preferably gcc)
+- make (to make the Makefile, duh)
+To build 6502golf, cd to the src directory and
+simply type "make".
+I haven't got it quite figured out for Windows,
+yet so if anyone has any ideas, please send me a
+pull request.
+
+SPECIFICATIONS
+========================
+- 6502golf supports NMOS 6502.
++ You can use CMOS 65C02 but you'll have to fiddle
+  with the Makefile to get it to build.
+  Change NMOS6502 to CMOS6502 in the Makefile.
+- If no binary is provided, a simple embedded test
+  ROM will be run that prints: "6502GOLF TEST ROM".
+- If a binary is provided, it will be loaded at the
+  load address specified by the first 2 bytes of the
+  binary.
+- Program execution will start at PC=$0200. 
+  (no exceptions)
+- If a byte is written into $00, whatever was
+  written there will be output to stdout.
+- If a byte is read from $01, a character will be
+  read from stdin. 
+- Memory from $0002 to $FFE0 is left free for the
+  user to use.
+- $FFE0 to $FFFF is reserved for system purposes.
+  You can use this range, however your program
+  may break in future updates.
+
+CREDITS AND LICENSES
+========================
+This project is licensed under the GNU GPLv2.
+fake6502 (the 6502 emulator core used in 6502golf)
+originally written by Mike Chambers, modified by
+omarandlorraine, is licensed under the GNU GPLv2.
+
+RESOURCES
+========================
+fake6502 (the 6502 emulator core): https://github.com/omarandlorraine/fake6502
+64tass (6502 assembler): https://github.com/irmen/64tass
+Easy 6502 (for learning): https://skilldrick.github.io/easy6502/
+
