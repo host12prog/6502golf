@@ -3,6 +3,7 @@
 #include "fake6502.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
 
 uint8_t memory[0xFFFF] = {0};
 static const uint8_t _6502golf_rom[]  = {
@@ -23,7 +24,7 @@ uint8_t fake6502_mem_read(fake6502_context *c, uint16_t addr) {
       } else {
         memory[0x01] = 0xFF;
       }
-      // side-effect: 0x00 is read-only(?)
+      // side-effect: 0x01 is read-only(?)
       return memory[addr];
     default:
       return memory[addr];
@@ -70,6 +71,22 @@ void usage() {
 }
 */
 
+int execute(fake6502_context *c) {
+  uint16_t lastpc;
+  lastpc = c->cpu.pc; // hack: if BRK is executed the PC is 0000
+  fake6502_step(c);
+  if (c->emu.opcode == 0x00) {
+    printf("\n\n(BRK encountered) A: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\n", c->cpu.a, c->cpu.x, c->cpu.y, c->cpu.s, lastpc, c->cpu.flags);
+    return 1;
+  }
+  return 0;
+}
+
+void init(fake6502_context *c) {
+  fake6502_reset(c); // init cpu
+  c->cpu.pc = 0x0200;
+}
+
 int main(int argc, char *argv[]) {
   printf("6502GOLF version %d\n", VERSION);
   printf("6502GOLF comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; See LICENSE!\n\n");
@@ -87,15 +104,16 @@ int main(int argc, char *argv[]) {
     }
   }
   fake6502_context f6502;
-  fake6502_reset(&f6502); // init cpu
-  f6502.cpu.pc = 0x0200;
-  uint16_t lastpc;
+  init(&f6502);
+  clock_t start_time = clock();
+  int exec_code;
   for (;;) {
-    lastpc = f6502.cpu.pc; // hack: if BRK is executed the PC is 0000
-    fake6502_step(&f6502);
-    if (f6502.emu.opcode == 0x00) {
-      printf("A: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\n", f6502.cpu.a, f6502.cpu.x, f6502.cpu.y, f6502.cpu.s, lastpc, f6502.cpu.flags);
-      break;
+    exec_code = execute(&f6502);
+    if (exec_code == 1) break;
+    if (clock() >= start_time + 20) {
+      fake6502_irq(&f6502);
+      start_time = clock();
+      memory[0xFFE0]++;
     }
   }
   return 0;
