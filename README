@@ -31,6 +31,9 @@ SPECIFICATIONS
   binary.
 - Program execution will start at PC=$0200. 
   (no exceptions)
+- An IRQ will be called every 1/50th of a second.
+  Use them by writing an address to $FFFE and $FFFF.
+- The address $FFE0 will be incremented every 20ms.
 - If a byte is written into $00, whatever was
   written there will be output to stdout.
 - If a byte is read from $01, a character will be
