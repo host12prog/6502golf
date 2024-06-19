@@ -42,8 +42,9 @@ void fake6502_mem_write(fake6502_context *c, uint16_t addr, uint8_t val) {
   }
 }
 
-uint16_t load(const char* fn, int load_addr_ign) {
+int load(const char* fn, int load_addr_ign) {
   FILE *f = fopen(fn, "r");
+  if (f == NULL) return -1;
   uint8_t lb, hb;
   int c;
   fseek(f, 0, SEEK_SET);
@@ -75,6 +76,10 @@ int main(int argc, char *argv[]) {
   int load_addr_ignore = 0;
   if (argc > 1) {
     int load_addr = load(argv[1], load_addr_ignore);
+    if (load_addr == -1) {
+      fprintf(stderr, "File does not exist!\n");
+      return 1;
+    }
     printf("Program loaded at $%04X", load_addr);
   } else {
     for (int i=0;i<33;i++) {
