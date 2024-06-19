@@ -1,2 +1,2 @@
-src/*.o
-src/6502golf
+*.o
+6502golf
