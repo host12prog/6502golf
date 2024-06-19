@@ -12,8 +12,7 @@ you right now, but building 6502golf is easy and
 requires no other dependencies. All you need are:
 - a C compiler (preferably gcc)
 - make (to make the Makefile, duh)
-To build 6502golf, cd to the src directory and
-simply type "make". (should work on all *NIX systems)
+To build 6502golf, simply type "make". (should work on all *NIX systems)
 For Windows, you could try building it using MinGW.
 I haven't got it quite figured out for Windows,
 yet so if anyone has any more ideas, please send
