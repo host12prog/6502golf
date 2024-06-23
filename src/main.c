@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
+#include <termios.h>
+#include <unistd.h>
+// TO-DO: termios is incompatible with windows
+//        and i should find something else
 
 uint8_t memory[0xFFFF] = {0};
 static const uint8_t _6502golf_rom[]  = {
@@ -84,6 +88,7 @@ int execute(fake6502_context *c) {
 
 void init(fake6502_context *c) {
   fake6502_reset(c); // init cpu
+  // dilemma: set pc or set reset vector?
   c->cpu.pc = 0x0200;
 }
 
@@ -109,11 +114,20 @@ int main(int argc, char *argv[]) {
       memory[0x200+i] = _6502golf_rom[i];
     }
   }
-  fake6502_context f6502;
+  // argc argv cruft
+  // init terminal
+  static struct termios oldt, newt;
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  fake6502_context f6502; // init cpu
   init(&f6502);
   clock_t start_time = clock();
   int exec_code;
+  //uint16_t timer_val;
   for (;;) {
+    //timer_val = (memory[0xFFE2] << 8) | memory[0xFFE1];
     exec_code = execute(&f6502);
     if (exec_code == 1) break;
     if (clock() >= start_time + 20) {
@@ -122,5 +136,6 @@ int main(int argc, char *argv[]) {
       memory[0xFFE0]++;
     }
   }
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
   return 0;
 }
