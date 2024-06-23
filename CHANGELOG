@@ -1,0 +1,18 @@
+Version 1
+===================
+- Initial version
+
+Version 2
+===================
+- Added a new IRQ source that runs every 20ms
+- Added a new counter at $FFE0 that increments
+every 20ms
+
+Version 3
+===================
+- Moved STDOUT and STDIN to $FFE0 and $FFE1
+- Moved counter to $FFE2
+- Removed built-in test ROM
+- Emulator no longer forces CPU program counter
+  to $0200, program execution handled by user
+  by setting RESET vector instead

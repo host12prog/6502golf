@@ -4,16 +4,12 @@
 ; at a time
 
 * = $0200
-	sei
-	lda #<irq ; set IRQ vector
-	sta $fffe ; to our IRQ routine
-	lda #>irq
-	sta $ffff
+main:
+  cli
 	lda #$0a ; newline
-	sta $00
+	sta $FFE0
 	lda #0
 	sta $40 ; $40 is our timer
-	cli
 	jmp * ; we better not BRK, we need IRQs
 irq:
 	pha
@@ -21,8 +17,16 @@ irq:
 	cmp #50 ; 50 ticks yet?
 	bne noirq ; no then jump
 	lda #$41 ; send character
-	sta $00
+	sta $FFE0
 noirq:
 	inc $40
 	pla
 	rti
+empty_handler:
+	rti
+reset_handler:
+	jmp main
+* = $FFFA
+	.word empty_handler
+	.word reset_handler
+	.word irq

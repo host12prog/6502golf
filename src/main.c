@@ -1,4 +1,7 @@
-#define VERSION 2
+#define VERSION 3
+#define G_STDOUT 0xFFE0
+#define G_STDIN 0xFFE1
+#define G_COUNT 0xFFE2
 
 #include "fake6502.h"
 #include <stdio.h>
@@ -11,25 +14,18 @@
 //        and i should find something else
 
 uint8_t memory[0xFFFF] = {0};
-static const uint8_t _6502golf_rom[]  = {
-  0xb9, 0x0e, 0x02, 0xc9, 0x00, 0xf0, 0x06, 0x85, 0x00, 0xc8, 0x4c, 0x00, 0x02, 0x00, 0x36, 
-  0x35, 0x30, 0x32, 0x47, 0x4f, 0x4c, 0x46, 0x20, 0x54, 0x45, 0x53, 0x54, 0x20, 0x52, 0x4f, 
-  0x4d, 0x0a, 0x00
-};
-// yeah it's small enough to fit here
-// got a problem?
 
 uint8_t fake6502_mem_read(fake6502_context *c, uint16_t addr) {
   int cb;
   switch (addr) {
-    case 0x01:
+    case G_STDIN:
       cb = getchar();
       if (cb != EOF) {
-        memory[0x01] = cb;
+        memory[G_STDIN] = cb;
       } else {
-        memory[0x01] = 0xFF;
+        memory[G_STDIN] = 0xFF;
       }
-      // side-effect: 0x01 is read-only(?)
+      // side-effect: 0xFFE1 is read-only(?)
       return memory[addr];
     default:
       return memory[addr];
@@ -38,9 +34,9 @@ uint8_t fake6502_mem_read(fake6502_context *c, uint16_t addr) {
 
 void fake6502_mem_write(fake6502_context *c, uint16_t addr, uint8_t val) {
   switch (addr) {
-    case 0x00:
+    case G_STDOUT:
       putchar(val);
-      // side-effect: 0x00 is write-only
+      // side-effect: 0xFFE0 is write-only
       break;
     default:
       memory[addr] = val;
@@ -110,9 +106,8 @@ int main(int argc, char *argv[]) {
     }
     printf("Program loaded at $%04X", load_addr);
   } else {
-    for (int i=0;i<33;i++) {
-      memory[0x200+i] = _6502golf_rom[i];
-    }
+    printf("No binary found! (Version 3 onwards do not include a test ROM)\n");
+    return 1;
   }
   // argc argv cruft
   // init terminal
@@ -133,7 +128,7 @@ int main(int argc, char *argv[]) {
     if (clock() >= start_time + 20) {
       fake6502_irq(&f6502);
       start_time = clock();
-      memory[0xFFE0]++;
+      memory[G_COUNT]++;
     }
   }
   tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
