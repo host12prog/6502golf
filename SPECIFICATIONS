@@ -1,0 +1,100 @@
+6502golf
+=======================
+6502golf is a code golf machine which is
+currently suffering from feature creep!
+
+- MOS 6502 CPU (or 65C02)
+- 64K of RAM
+- dumb terminal display
+- an IRQ that happens every 20ms
+
+BOOT-UP
+======================
+Before RESET, the memory is loaded with
+machine code (written by the user).
+On boot-up, the machine jumps to the RESET
+vector specified at vector $FFFC-$FFFD.
+Before version 3, the machine would force
+the program counter of the CPU to $0200.
+The stack pointer is set to $FA on
+boot-up, so if you wish to use all of
+the stack, store an $FF into the stack
+pointer:
+  LDX #$FF
+  TXS
+
+EXECUTION
+======================
+The CPU will begin execution at the RESET
+vector specified by the program.
+Here, you can jump to somewhere else to
+begin program execution.
+It is not recommended that you try to
+write a program within the RESET handler.
+An RTI instruction is not needed, as RESET
+only occurs once on boot-up.
+
+Every 20ms (1/50th of a second), an IRQ
+will occur, however what this IRQ does
+is left up to the user. A design choice
+was made so that it generated IRQs
+instead of NMIs, so if the user wishes
+to not use these interrupts, they can
+add a SEI instruction to their program.
+Whenever these IRQs occur, a counter is
+also incremented by 1. This counter is
+located at memory location $FFE2, and
+can be read from or written to.
+
+DISPLAY
+======================
+The display is a dumb terminal display,
+emulated by your terminal emulator.
+Because it is a dumb terminal, one can
+send control codes and ANSI escape
+sequences (to set cursor, color, etc...).
+
+Only one byte can be output to the
+display at a time. The standard output
+is located at memory location $FFE0.
+Bytes written here must be valid ASCII.
+To allow for user input, standard
+input also exists, and is located at
+memory location $FFE1.
+
+Note that STDOUT (standard output, $FFE0)
+is a write-only memory location. If a read
+is attempted on this address, it will be
+a value of $00.
+STDIN (standard input, $FFE1) is read-only,
+however the emulator does not correctly
+emulate the read-only behavior, and thus
+you can write any value to the STDIN register.
+It is not recommended to write a value here,
+though, as this behavior will be fixed at a
+later date.
+
+If one wishes to display more complex
+graphics, they can utilize ANSI escape
+sequences, or use a display buffer.
+
+USEFUL MEMORY LOCATIONS
+======================
+$0000-$00FF: Zero-Page (256 bytes)
+$0100-$01FF: Stack (256 bytes)
+$0200-$FFDF: General-Purpose RAM (64491 bytes)
+$FFE0: STDOUT (Standard Output)
+$FFE1: STDIN (Standard Input)
+$FFE2: COUNT (50hz Counter)
+$FFE3-$FFF9: Reserved (22 bytes)
+$FFFA-$FFFB: NMI vector (Unused)
+$FFFC-$FFFD: RESET vector (Boot-Up)
+$FFFE-$FFFF: IRQ vector (50hz)
+(Note: The 6502 is little-endian,
+so for the vectors, you must load
+the low byte first ($xxYY) and then
+load the high byte last ($XXyy).
+In assembler syntax, low byte would
+be: #<label, and high byte would
+be: #>label)
+
