@@ -39,3 +39,8 @@ Version 5
   ----rrcc
   rr: 2 topmost bits of TERMROW
   cc: 2 topmost bits of TERMCOL
+
+Version 5.1
+===================
+- Switched from NMOS 6502 to CMOS 6502 as default
+- Laid groundwork for audio

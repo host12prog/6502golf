@@ -1,8 +1,8 @@
 /* build info */
-#define NMOS_6502 1 // change NMOS to CMOS for 65C02 support
+#define CMOS_6502 1
 #define DECIMAL_MODE 1
 #define VERSION 5
-#define SUBVERSION 0
+#define SUBVERSION 1
 /* memory addresses */
 #define G_IOBASE 0xFFE0
 #define G_STDOUT (G_IOBASE)
@@ -20,6 +20,7 @@
 #define G_TICK (CLOCKS_PER_SEC / G_FPS)
 /* headers */
 #include "fake6502.h"
+#include "libt85apu/t85apu.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -34,12 +35,18 @@
 
 uint8_t memory[0xFFFF] = {0};
 struct termios orig_termios;
+fake6502_context f6502; // init cpu
 
 void disableRawMode() {
 	if (tcsetattr(0, TCSAFLUSH, &orig_termios) == -1)
 		exit(2);
 }
-void sigintdrm(int a) { (void)a; disableRawMode(); exit(0); }
+void sigintdrm(int a) {
+	(void)a;
+	disableRawMode();
+	printf("\n\nA: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\n", f6502.cpu.a, f6502.cpu.x, f6502.cpu.y, f6502.cpu.s, f6502.cpu.pc, f6502.cpu.flags);
+	exit(0);
+}
 
 void enableRawMode() {
 	if (tcgetattr(0, &orig_termios) == -1) exit(2);
@@ -162,7 +169,6 @@ int main(int argc, char *argv[]) {
 	// init terminal
 	getTermXY();
 	enableRawMode();
-	fake6502_context f6502; // init cpu
 	init(&f6502);
 	int cb;
 	for (;;) {
@@ -187,6 +193,5 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	disableRawMode();
-	printf("\n\nA: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\n", f6502.cpu.a, f6502.cpu.x, f6502.cpu.y, f6502.cpu.s, f6502.cpu.pc, f6502.cpu.flags);
 	return 0;
 }
