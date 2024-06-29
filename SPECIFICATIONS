@@ -72,6 +72,9 @@ Only one byte can be output to the
 display at a time. The standard output
 is located at memory location $FFE0.
 Bytes written here must be valid ASCII.
+Alternatively, the program can write
+to $FFE4, which will send it to standard
+error (STDERR).
 To allow for user input, standard
 input also exists, and is located at
 memory location $FFE1.
@@ -102,6 +105,7 @@ $FFE0: STDOUT (Standard Output)
 $FFE1: STDIN (Standard Input)
 $FFE2: COUNT (50hz Counter)
 $FFE3: IRQACK (Interrupt Acknowledge)
+$FFE4: STDERR (Standard Error)
 $FFE4-$FFF9: Reserved (21 bytes)
 $FFFA-$FFFB: NMI vector (Unused)
 $FFFC-$FFFD: RESET vector (Boot-Up)

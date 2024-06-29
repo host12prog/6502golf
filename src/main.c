@@ -1,10 +1,12 @@
 #define NMOS_6502 1
 #define DECIMAL_MODE 1
 #define VERSION 4
+#define SUBVERSION 1
 #define G_STDOUT 0xFFE0
 #define G_STDIN 0xFFE1
 #define G_COUNT 0xFFE2
 #define G_IRQACK 0xFFE3
+#define G_STDERR 0xFFE4
 
 #include "fake6502.h"
 #include <stdio.h>
@@ -51,6 +53,9 @@ void fake6502_mem_write(fake6502_context *c, uint16_t addr, uint8_t val) {
 		case G_STDOUT:
 			putchar(val);
 			// side-effect: 0xFFE0 is write-only
+			break;
+		case G_STDERR:
+			fprintf(stderr, "%c", val);
 			break;
 		default:
 			memory[addr] = val;
@@ -102,7 +107,7 @@ void init(fake6502_context *c) {
 }
 
 int main(int argc, char *argv[]) {
-	printf("6502GOLF version %d (-h or --help for options)\n", VERSION);
+	printf("6502GOLF version %d.%d (-h or --help for options)\n", VERSION, SUBVERSION);
 	printf("6502GOLF comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; See LICENSE!\n\n");
 	int load_addr_ignore = 0;
 	if (argc > 1) {
