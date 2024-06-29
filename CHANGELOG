@@ -24,3 +24,6 @@ Version 4
 - System I/O space expanded to 256 bytes
   (from $FF00-$FFFF)
 
+Version 4.1
+==================
+- Added STDERR support
