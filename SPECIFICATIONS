@@ -93,7 +93,17 @@ later date.
 
 If one wishes to display more complex
 graphics, they can utilize ANSI escape
-sequences, or use a display buffer.
+sequences. To help with this task,
+the program can read TERMROW ($FFE5)
+and TERMCOL ($FFE6) to get the terminal 
+height and width. TERMROW and TERMCOL
+are 10-bit values, meaning the locations
+described above only show the lower 8 bits
+of the 10-bit value. The remaining 2 bits
+are collected at TERMHIGH ($FFE7):
+  ----xxyy
+xx: topmost 2 bits of TERMROW
+yy: topmost 2 bits of TERMCOL
 
 USEFUL MEMORY LOCATIONS
 ======================
@@ -106,6 +116,10 @@ $FFE1: STDIN (Standard Input)
 $FFE2: COUNT (50hz Counter)
 $FFE3: IRQACK (Interrupt Acknowledge)
 $FFE4: STDERR (Standard Error)
+$FFE5: TERMROW (Terminal Rows, 10-bit)
+$FFE6: TERMCOL (Terminal Columns, 10-bit)
+$FFE7: TERMHIGH (remaining 2 bits of TERMROW
+								 and TERMCOL)
 $FFE4-$FFF9: Reserved (21 bytes)
 $FFFA-$FFFB: NMI vector (Unused)
 $FFFC-$FFFD: RESET vector (Boot-Up)

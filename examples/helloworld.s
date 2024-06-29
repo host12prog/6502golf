@@ -1,5 +1,7 @@
 * = $0200
 main:
+	lda #$0D
+	sta $FFE0
 	lda #$0A
 	sta $FFE0
 loop:
@@ -10,7 +12,7 @@ loop:
 	iny
 	jmp loop
 done:
-	brk
+	jmp done ; get stuck here
 text:
 	.text "Hello world!",$0A,$00
 empty_handler:

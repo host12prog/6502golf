@@ -27,3 +27,15 @@ Version 4
 Version 4.1
 ==================
 - Added STDERR support
+  STDERR register at $FFE4
+
+Version 5
+==================
+- Emulated 6502 CPU now runs at 8 MHz
+- New 10-bit TERMROW, TERMCOL register at:
+  TERMROW at $FFE5 (lower 8 bits)
+  TERMCOL at $FFE6 (lower 8 bits)
+  TERMHIGH at $FFE7
+  ----rrcc
+  rr: 2 topmost bits of TERMROW
+  cc: 2 topmost bits of TERMCOL
