@@ -34,6 +34,8 @@ write a program within the RESET handler.
 An RTI instruction is not needed, as RESET
 only occurs once on boot-up.
 
+INTERRUPTS
+======================
 Every 20ms (1/50th of a second), an IRQ
 will occur, however what this IRQ does
 is left up to the user. A design choice
@@ -41,10 +43,22 @@ was made so that it generated IRQs
 instead of NMIs, so if the user wishes
 to not use these interrupts, they can
 add a SEI instruction to their program.
+A consequence is that the NMI line has
+been left unused, so an NMI can never
+occur in normal operation.
 Whenever these IRQs occur, a counter is
 also incremented by 1. This counter is
 located at memory location $FFE2, and
 can be read from or written to.
+When this interrupt is triggered, it
+sets bit 0 of $FFE3 (IRQACK)
+the program must acknowledge the IRQ
+by clearing bit 0 of IRQACK.
+The most orthodox way of doing this:
+  LDA #0
+  STA $FFE3
+The remaining bits in IRQACK are
+unused, and if read, will be clear.
 
 DISPLAY
 ======================
@@ -82,11 +96,13 @@ USEFUL MEMORY LOCATIONS
 ======================
 $0000-$00FF: Zero-Page (256 bytes)
 $0100-$01FF: Stack (256 bytes)
-$0200-$FFDF: General-Purpose RAM (64491 bytes)
+$0200-$FEFF: General-Purpose RAM (64767 bytes)
+$FF00-$FFDF: Reserved I/O (223 bytes)
 $FFE0: STDOUT (Standard Output)
 $FFE1: STDIN (Standard Input)
 $FFE2: COUNT (50hz Counter)
-$FFE3-$FFF9: Reserved (22 bytes)
+$FFE3: IRQACK (Interrupt Acknowledge)
+$FFE4-$FFF9: Reserved (21 bytes)
 $FFFA-$FFFB: NMI vector (Unused)
 $FFFC-$FFFD: RESET vector (Boot-Up)
 $FFFE-$FFFF: IRQ vector (50hz)

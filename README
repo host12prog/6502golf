@@ -13,37 +13,27 @@ requires no other dependencies. All you need are:
 - a C compiler (preferably gcc)
 - make (to make the Makefile, duh)
 To build 6502golf, simply type "make". (should work on all *NIX systems)
-For Windows, you could try building it using MinGW.
+For Windows, you could try building it using MinGW
+or cygwin.
 I haven't got it quite figured out for Windows,
 yet so if anyone has any more ideas, please send
 me a pull request.
 
 SPECIFICATIONS
 ========================
-- 6502golf supports NMOS 6502.
+- 6502golf supports NMOS 6502 by default.
 + You can use CMOS 65C02 but you'll have to fiddle
-  with the Makefile to get it to build.
-  Change NMOS6502 to CMOS6502 in the Makefile.
+  with the source to get it to build.
+  Change NMOS6502 to CMOS6502 in main.c.
 - Since version 3, a test ROM is no longer built
   into the program. Therefore, a binary must
   be provided to 6502golf.
 - If a binary is provided, it will be loaded at the
-  load address specified by the first 2 bytes of the
-  binary.
-- On RESET, the RESET vector will be called.
-  Your program must set the RESET vector.
-- An IRQ will be called every 1/50th of a second.
-  Use them by writing an address to $FFFE and $FFFF.
-- The address $FFE2 will be incremented every 20ms.
-- If a byte is written into $FFE0, whatever was
-  written there will be output to stdout.
-- If a byte is read from $FFE1, a character will be
-  read from stdin. 
-- Memory from $0000 to $FFE0 is left free for the
-  user to use.
-- $FFE0 to $FFFF is reserved for system purposes.
-  You can use this range, however your program
-  may break in future updates.
+  load address specified in the first 2 bytes of
+  the binary (unless -x or --no-load-address is
+  specified)
+- For the memory map and operation, read the
+  included SPECIFICATIONS file.
 
 CREDITS AND LICENSES
 ========================

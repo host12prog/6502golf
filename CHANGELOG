@@ -16,3 +16,11 @@ Version 3
 - Emulator no longer forces CPU program counter
   to $0200, program execution handled by user
   by setting RESET vector instead
+
+Version 4
+===================
+- Fixed IRQ timing
+- New IRQ acknowledge register at $FFE3
+- System I/O space expanded to 256 bytes
+  (from $FF00-$FFFF)
+
