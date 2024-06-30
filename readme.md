@@ -13,8 +13,8 @@ To build 6502golf, simply type "make". (should work on all *NIX systems) For Win
 
 ## SPECIFICATIONS
 
-- 6502golf supports NMOS 6502 by default.
-  - You can use CMOS 65C02 but you'll have to fiddle with the source to get it to build. Change `NMOS6502` to `CMOS6502` in `main.c`.
+- 6502golf supports CMOS 65C02 by default.
+  - You can use CMOS 65C02 but you'll have to fiddle with the source to get it to build. Change `CMOS6502` to `NMOS6502` in `main.c`.
 - Since version 3, a test ROM is no longer built into the program. Therefore, a binary must be provided to 6502golf.
 - If a binary is provided, it will be loaded at the load address specified in the first 2 bytes of the binary (unless -x or --no-load-address is specified)
 - For the memory map and operation, read the included [specifications.md](specifications.md) file.

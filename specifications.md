@@ -2,16 +2,15 @@
 
 6502golf is a code golf machine which is currently suffering from feature creep!
 
-- MOS 6502 CPU (or 65C02)
+- WDC 65C02 (8.0 MHz, 50hz VBLANK)
 - 64K of RAM
 - dumb terminal display
-- an IRQ that happens every 20ms
 
 ## BOOT-UP
 
-Before RESET, the memory is loaded with machine code (written by the user). On boot-up, the machine jumps to the RESET vector specified at vector `$FFFC`-`$FFFD`.
+Before RESET, the memory is loaded with machine code (written by the user). On boot-up, the CPU jumps to the RESET vector specified at vector `$FFFC`-`$FFFD`.
 
-Before version 3, the machine would force the program counter of the CPU to `$0200`. The stack pointer is set to $FA on boot-up, so if you wish to use all of the stack, store an $FF into the stack pointer: 
+Before version 3, the machine would force the program counter of the CPU to `$0200`. The stack pointer is set to $FD on boot-up, so if you wish to use all of the stack, store an $FF into the stack pointer: 
 ```
 LDX #$FF
 TXS
@@ -23,7 +22,9 @@ The CPU will begin execution at the RESET vector specified by the program. Here,
 
 ## INTERRUPTS
 
-Every 20ms (1/50th of a second), an IRQ will occur, however what this IRQ does is left up to the user. A design choice was made so that it generated IRQs instead of NMIs, so if the user wishes to not use these interrupts, they can add a SEI instruction to their program. A consequence is that the NMI line has been left unused, so an NMI can never occur in normal operation.
+Every 20ms (1/50th of a second), a VBLANK IRQ will occur, however what this IRQ does is left up to the user. A design choice was made so that it generated IRQs instead of NMIs, so if the user wishes to not use these interrupts, they can add a SEI instruction to their program. A consequence is that the NMI line has been left unused, so an NMI can never occur in normal operation.
+
+It is inaccurate to call these IRQs VBLANK IRQs, as the display is a dumb terminal and as such does not have a VBLANK, however internally the machine keeps track of how many cycles left until VBLANK. The machine will run for 160,000 cycles, and when it is done, it will wait for +/-20ms for the next frame
 
 Whenever these IRQs occur, a counter is also incremented by 1. This counter is located at memory location $FFE2, and can be read from or written to. When this interrupt is triggered, it sets bit 0 of `$FFE3` (IRQACK). The program must acknowledge the IRQ by clearing bit 0 of IRQACK. The most orthodox way of doing this:
 ```
@@ -64,7 +65,7 @@ yy: topmost 2 bits of TERMCOL
 - `$FFE5`: TERMROW (Terminal Rows, 10-bit)
 - `$FFE6`: TERMCOL (Terminal Columns, 10-bit)
 - `$FFE7`: TERMHIGH (remaining 2 bits of TERMROW and TERMCOL)
-- `$FFE4-$FFF9`: Reserved (21 bytes)
+- `$FFE8-$FFF9`: Reserved (17 bytes)
 - `$FFFA-$FFFB`: NMI vector (Unused)
 - `$FFFC-$FFFD`: RESET vector (Boot-Up)
 - `$FFFE-$FFFF`: IRQ vector (50hz)
