@@ -28,6 +28,7 @@
 #include <time.h>
 #include <termios.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 // TO-DO: termios is incompatible with windows
@@ -44,6 +45,7 @@ void disableRawMode() {
 void sigintdrm(int a) {
 	(void)a;
 	disableRawMode();
+	printf("\e[?1049l");
 	printf("\n\nA: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\n", f6502.cpu.a, f6502.cpu.x, f6502.cpu.y, f6502.cpu.s, f6502.cpu.pc, f6502.cpu.flags);
 	exit(0);
 }
@@ -144,6 +146,12 @@ void init(fake6502_context *c) {
 	// to-do: why have a function for this?
 }
 
+void print_cpu_info() {
+	printf("\e7\e[");
+	printf("%d;1H", memory[G_TERMROW]);
+	printf("\e[7mA: $%02X, X: $%02X, Y: $%02X, SP: $%02X, PC: $%04X, Flags: $%02X\e[27m\e8", f6502.cpu.a, f6502.cpu.x, f6502.cpu.y, f6502.cpu.s, f6502.cpu.pc, f6502.cpu.flags);
+}
+
 int main(int argc, char *argv[]) {
 	printf("6502GOLF version %d.%d (-h or --help for options)\n", VERSION, SUBVERSION);
 	printf("6502GOLF comes with ABSOLUTELY NO WARRANTY; This is free software, and you are welcome to redistribute it under certain conditions; See LICENSE!\n\n");
@@ -168,6 +176,7 @@ int main(int argc, char *argv[]) {
 	// argc argv cruft
 	// init terminal
 	getTermXY();
+	printf("\e[?1049h\e[2J\e[1;1H");
 	enableRawMode();
 	init(&f6502);
 	int cb;
@@ -175,6 +184,7 @@ int main(int argc, char *argv[]) {
 		clock_t it_time = clock() + G_TICK;
 		for (int i=0;i<G_CYCLES;i+=f6502.emu.clockticks) {
 			execute(&f6502);
+			print_cpu_info();
 		}
 		memory[G_COUNT]++;
 		cb = getchar();
@@ -188,6 +198,7 @@ int main(int argc, char *argv[]) {
 			fake6502_irq(&f6502);
 		}
 		for (;;) {
+			print_cpu_info();
 			if (clock() < it_time) continue;
 			else break;
 		}
