@@ -12,8 +12,8 @@ Before RESET, the memory is loaded with machine code (written by the user). On b
 
 Before version 3, the machine would force the program counter of the CPU to `$0200`. The stack pointer is set to $FD on boot-up, so if you wish to use all of the stack, store an $FF into the stack pointer: 
 ```
-LDX #$FF
-TXS
+  LDX #$FF
+  TXS
 ```
 
 ## EXECUTION
@@ -28,8 +28,9 @@ It is inaccurate to call these IRQs VBLANK IRQs, as the display is a dumb termin
 
 Whenever these IRQs occur, a counter is also incremented by 1. This counter is located at memory location $FFE2, and can be read from or written to. When this interrupt is triggered, it sets bit 0 of `$FFE3` (IRQACK). The program must acknowledge the IRQ by clearing bit 0 of IRQACK. The most orthodox way of doing this:
 ```
-LDA #0
-STA $FFE3
+  LDA #0 ; %00000000
+         ;         ^-- VBLANK IRQACK
+  STA $FFE3 ; Acknowledge the IRQ request
 ```
 
 The remaining bits in IRQACK are unused, and if read, will be clear.
@@ -38,13 +39,18 @@ The remaining bits in IRQACK are unused, and if read, will be clear.
 
 The display is a dumb terminal display, emulated by your terminal emulator. Because it is a dumb terminal, one can send control codes and ANSI escape sequences (to set cursor, color, etc...).
 
-Only one byte can be output to the display at a time. The standard output is located at memory location `$FFE0`. Bytes written here must be valid ASCII. Alternatively, the program can write to $FFE4, which will send it to standard error (STDERR). To allow for user input, standard input also exists, and is located at memory location `$FFE1`.
+Only one byte can be output to the display at a time. The standard output is located at memory location `$FFE0`. Bytes written here must be valid ASCII. Alternatively, the program can write to `$FFE4`, which will send it to standard error (STDERR). To allow for user input, standard input also exists, and is located at memory location `$FFE1`, which is a read-only memory location, so any writes here will fail.
 
-Note that STDOUT (standard output, $FFE0) is a write-only memory location. If a read is attempted on this address, it will be a value of $00.
+Whenever a key is pressed, the key's ASCII value is sent to STDIN, however the value will persist in STDIN for some time, and to prevent duplication when printing STDIN to STDOUT/STDERR, the program must enter an infinite loop to wait for STDIN to be zero again:
+```
++ LDA $FFE1 ; Read STDIN
+  BNE + ; If it is not zero, jump back to
+        ; reading STDIN until it's zero
+```
 
-STDIN (standard input, `$FFE1`) is read-only, however the emulator does not correctly emulate the read-only behavior, and thus you can write any value to the STDIN register. It is not recommended to write a value here, though, as this behavior will be fixed at a later date.
+Note that STDOUT (standard output, $FFE0) is a write-only memory location. If a read is attempted on this address, it will be a value of `$00`.
 
-If one wishes to display more complex graphics, they can utilize ANSI escape sequences. To help with this task, the program can read TERMROW ($FFE5) and TERMCOL ($FFE6) to get the terminal  height and width. TERMROW and TERMCOL are 10-bit values, meaning the locations described above only show the lower 8 bits of the 10-bit value. The remaining 2 bits are collected at TERMHIGH (`$FFE7`):
+If one wishes to display more complex graphics, they can utilize ANSI escape sequences. To help with this task, the program can read TERMROW (`$FFE5`) and TERMCOL (`$FFE6`) to get the terminal  height and width. TERMROW and TERMCOL are 10-bit values, meaning the locations described above only show the lower 8 bits of the 10-bit value. The remaining 2 bits are collected at TERMHIGH (`$FFE7`):
 ```
   ----xxyy
 xx: topmost 2 bits of TERMROW

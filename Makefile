@@ -1,9 +1,11 @@
 CC=gcc
+CPUTYPE = CMOS6502
 CFLAGS=-I. -Wall
-DEPS=fake6502.h
+DEPS = src/mmu.h src/fake6502.h
+OBJ = main.o mmu.o fake6502.o
 
-%.o: src/%.c src/$(DEPS)
+%.o: src/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-build: fake6502.o main.o
-	$(CC) -o 6502golf fake6502.o main.o
+6502golf: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
